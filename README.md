@@ -6,7 +6,7 @@ A reference implementation of an **AI chat assistant with interactive UI forms**
 
 ## Demo
 
-<video src="docs/Screencast from 2026-05-20 15-44-08.mp4" controls width="100%"></video>
+<video src="docs/demo.mp4" controls width="100%"></video>
 
 ---
 
