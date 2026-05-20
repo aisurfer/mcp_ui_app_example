@@ -1,0 +1,91 @@
+version: "3.9"
+
+services:
+  booking-service:
+    build:
+      context: ./booking-service
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3002:3002"
+    networks:
+      - app_network
+    environment:
+      PORT: 3002
+    volumes:
+      - ./booking-service/src:/app/src
+      - ./booking-service/public:/app/public
+      - ./booking-service/tsconfig.json:/app/tsconfig.json
+    command: pnpm exec ts-node --transpile-only src/index.ts
+    restart: unless-stopped
+
+  mcp-ui-server:
+    build:
+      context: ./mcp-ui-server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3011:3001"
+    networks:
+      - app_network
+    environment:
+      PORT: 3001
+      BOOKING_SERVICE_URL: http://booking-service:3002
+    volumes:
+      - ./mcp-ui-server/src:/app/src
+      - ./mcp-ui-server/tsconfig.json:/app/tsconfig.json
+    command: pnpm exec ts-node --transpile-only src/index.ts
+    depends_on:
+      - booking-service
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    networks:
+      - app_network
+    environment:
+      PORT: 3000
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      MCP_UI_SERVER_URL: http://mcp-ui-server:3001/mcp
+      BOOKING_MCP_URL: http://booking-service:3002/mcp
+      BOOKING_SERVICE_URL: http://booking-service:3002
+      PUBLIC_BOOKING_URL: http://localhost:3002
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/tsconfig.json:/app/tsconfig.json
+    command: pnpm exec ts-node --transpile-only src/index.ts
+    depends_on:
+      - mcp-ui-server
+      - booking-service
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    networks:
+      - app_network
+    environment:
+      BACKEND_URL: http://backend:3000
+      VITE_BACKEND_URL: http://localhost:3000
+      VITE_BOOKING_SERVICE_URL: http://localhost:3002
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+    command: pnpm exec vite --host 0.0.0.0
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  app_network:
+    driver: bridge
