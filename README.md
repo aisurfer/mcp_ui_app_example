@@ -1,3 +1,6 @@
+
+
+
 # MCP UI App Example
 
 A reference implementation of an **AI chat assistant with interactive UI forms** delivered via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). The agent books meetings with colleagues through a multi-step flow: it presents an interactive HTML booking form inside the chat, waits for the user to fill it out, calls a backend booking service, and then renders a read-only result card — all orchestrated through MCP tools and SSE streaming.
@@ -5,8 +8,7 @@ A reference implementation of an **AI chat assistant with interactive UI forms**
 ---
 
 ## Demo
-
-<video src="docs/demo.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/af0580fb-27d9-4b61-80b1-b74d9a95a8e5
 
 ---
 
